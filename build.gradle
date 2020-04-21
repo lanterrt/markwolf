@@ -4,8 +4,8 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.61'
 }
 
-group 'net.mamansoft'
-version '0.2.1'
+group 'com.develangel'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 

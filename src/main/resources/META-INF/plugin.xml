@@ -1,15 +1,14 @@
 <idea-plugin>
-    <id>net.mamansoft.markowl</id>
-    <name>Markowl</name>
-    <vendor url="http://mimizou.mamansoft.net/">tadashi-aikawa</vendor>
+    <id>com.develangel.markwolf</id>
+    <name>Markwolf</name>
+    <vendor url="https://github.com/lanterrt">Moonkyu Song</vendor>
 
     <description><![CDATA[
-    <div style="margin-bottom: 15px;">Markdown extended plugin for JetBrains IDEs and owl🦉</div>
+    <div style="margin-bottom: 15px;">Markdown extended plugin for JetBrains IDEs</div>
 
     <b>[Features]</b>
     <ul>
       <li>Format Table</li>
-      <li>Draw H1/H2 Line</li>
     </ul>
 
     ]]></description>
@@ -23,20 +22,15 @@
     </extensions>
 
     <actions>
-        <action id="net.mamansoft.markowl.action.markdown.FormatTableAction"
-                class="net.mamansoft.markowl.action.markdown.FormatTableAction" text="Markowl: Format Table"
+        <action id="com.develangel.markwolf.action.markdown.FormatTableAction"
+                class="com.develangel.markwolf.action.markdown.FormatTableAction" text="Markwolf: Format Table"
                 description="Format markdown table">
-            <keyboard-shortcut keymap="$default" first-keystroke="alt SEMICOLON"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt shift SEMICOLON"/>
         </action>
-        <action id="net.mamansoft.markowl.action.markdown.DrawH1LineAction"
-                class="net.mamansoft.markowl.action.markdown.DrawH1LineAction" text="Markowl: Draw H1 Line"
-                description="Draw a line(===) under a H1 title">
-            <keyboard-shortcut keymap="$default" first-keystroke="alt shift MINUS"/>
-        </action>
-        <action id="net.mamansoft.markowl.action.markdown.DrawH2LineAction"
-                class="net.mamansoft.markowl.action.markdown.DrawH2LineAction" text="Markowl: Draw H2 Line"
-                description="Draw a line(---) under a H2 title">
-            <keyboard-shortcut keymap="$default" first-keystroke="alt MINUS"/>
-        </action>
+      <action id="com.develangel.markwolf.action.markdown.ReformatTableAction"
+              class="com.develangel.markwolf.action.markdown.ReformatTableAction" text="Markwolf: Reformat Table"
+              description="Reformat markdown table">
+        <keyboard-shortcut keymap="$default" first-keystroke="alt SEMICOLON"/>
+      </action>
     </actions>
 </idea-plugin>

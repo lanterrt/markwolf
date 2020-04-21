@@ -1,4 +1,4 @@
-package net.mamansoft.markowl.domain
+package com.develangel.markwolf.domain
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
