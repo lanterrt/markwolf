@@ -1,12 +1,12 @@
 package com.develangel.markwolf.action.markdown
 
+import com.develangel.markwolf.domain.OwlDocument
+import com.develangel.markwolf.util.countExtended
+import com.develangel.markwolf.util.widthFor
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.util.TextRange
-import com.develangel.markwolf.domain.OwlDocument
-import com.develangel.markwolf.util.countExtended
-import com.develangel.markwolf.util.widthFor
 import kotlin.math.max
 
 const val MIN_WIDTH = 5
@@ -30,7 +30,7 @@ class Cell(content: String, private val real: Cell? = null, var col: Int = 1) {
   private val content = content.trim()
   private var reservedWidth: Int = widthFor(content)
   private var childrenWidth: Int = 0
-  private val isBar = if (real != null) { false } else { isBar(content.trim()) }
+  val isBar: Boolean = if (real != null) { false } else { isBar(content.trim()) }
   var width: Int
     get() {
       if (this.real != null || isBar) {
@@ -58,6 +58,19 @@ class Cell(content: String, private val real: Cell? = null, var col: Int = 1) {
     return prefix + (vs.repeat(reservedWidth-2)) + suffix
   }
 
+  val align: String?
+    get() {
+      if (isBar) {
+        if (content.endsWith(":")) {
+          if (content.startsWith(":")) {
+            return "center"
+          }
+          return "right"
+        }
+      }
+      return null
+    }
+
   val text: String
     get() {
       return when {
@@ -73,9 +86,24 @@ class Cell(content: String, private val real: Cell? = null, var col: Int = 1) {
         }
       }
     }
+
+  fun getHTML(tag: String, align: String?): String {
+    if (this.real != null) {
+      return ""
+    }
+    val params = mutableListOf<String>()
+    if (col>1) {
+      params.add("colspan=\"${col}\"")
+    }
+    if (align!=null) {
+      params.add("align=\"${align}\"")
+    }
+    val param = if (params.size>0) " ${params.joinToString(" ")}" else ""
+    return "<${tag}${param}>${content}</${tag}>"
+  }
 }
 
-fun toCells(line: String, trim: Boolean): List<Cell> {
+fun lineToCells(line: String, trim: Boolean): List<Cell> {
   val words = trimBorder(line).split("|")
     .map { if (it.isEmpty()) null else if (trim) it.trim() else it }
   val cells = mutableListOf<Cell>()
@@ -93,6 +121,10 @@ fun toCells(line: String, trim: Boolean): List<Cell> {
   return cells.toList()
 }
 
+fun toCells(tableStr: String, trim: Boolean): List<List<Cell>> {
+  return tableStr.split("\n").map { lineToCells(it, trim) }
+}
+
 fun inverseCells(rows: List<List<Cell>>): List<List<Cell>> {
   val colSize = rows.map { it.size }.max() ?: 0
   val columns = MutableList<MutableList<Cell>>(colSize) { mutableListOf<Cell>() }
@@ -105,13 +137,29 @@ fun inverseCells(rows: List<List<Cell>>): List<List<Cell>> {
 }
 
 fun formatTable(tableStr: String, trim: Boolean): String {
-  val rows = tableStr.split("\n").map { toCells(it, trim) }
+  val rows = toCells(tableStr, trim)
   val columns = inverseCells(rows)
   for ( col in columns ) {
     val maxWidth = col.map { cell -> cell.width }.max() ?: MIN_WIDTH
     for ( v in col ) v.width = maxWidth
   }
   return rows.joinToString("\n") { row -> "|${row.joinToString("|") { it.text }}|" }
+}
+
+fun convertTable(tableStr: String): String {
+  val rows = toCells(tableStr, true)
+  var tag = "th"
+  val aligns = rows.find { it.first().isBar }?.map { it.align }
+  return "<table>\n" + rows.mapNotNull { cells ->
+    if (cells.first().isBar) {
+      tag = "td"
+      null
+    } else {
+      "<tr>" + cells.mapIndexed { idx, cell ->
+        cell.getHTML(tag, aligns?.get(idx))
+      }.joinToString("") + "</tr>"
+    }
+  }.joinToString("\n") + "\n</table>"
 }
 
 fun getRangeAsTable(doc: OwlDocument): TextRange {
@@ -147,5 +195,18 @@ class ReformatTableAction : AnAction() {
 
     val tableRange = getRangeAsTable(doc)
     doc.safeReplace(tableRange, formatTable(doc.getTextByRange(tableRange), true))
+  }
+}
+
+class ConvertTableAction : AnAction() {
+  override fun update(e: AnActionEvent) {
+    e.presentation.isEnabledAndVisible = e.project != null && e.getData(CommonDataKeys.EDITOR) != null
+  }
+
+  override fun actionPerformed(e: AnActionEvent) {
+    val doc = OwlDocument(e)
+
+    val tableRange = getRangeAsTable(doc)
+    doc.safeReplace(tableRange, convertTable(doc.getTextByRange(tableRange)))
   }
 }

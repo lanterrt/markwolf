@@ -32,5 +32,10 @@
               description="Reformat markdown table">
         <keyboard-shortcut keymap="$default" first-keystroke="alt SEMICOLON"/>
       </action>
+      <action id="com.develangel.markwolf.action.markdown.ConvertTableAction"
+              class="com.develangel.markwolf.action.markdown.ConvertTableAction" text="Markwolf: Convert Table"
+              description="Convert markdown table to HTML">
+        <!-- <keyboard-shortcut keymap="$default" first-keystroke="alt SEMICOLON"/> -->
+      </action>
     </actions>
 </idea-plugin>
